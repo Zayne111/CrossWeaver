@@ -1,0 +1,61 @@
+DEVICE          : cuda             
+SAVE_DIR        : 'output'        
+
+MODEL:
+  NAME          : CrossWeaver                                            
+  BACKBONE      : CrossWeaver-B0                                       
+  PRETRAINED    : 'checkpoints/pretrained/segformer/mit_b0.pth'     
+  RESUME        : ''                                               
+
+DATASET:
+  NAME          : DELIVER                                          
+  ROOT          : '.../data/deliver/DELIVER'                             
+  IGNORE_LABEL  : 255
+  MODALS        : ['img', 'depth', 'event', 'lidar']
+  RARE_CLASS_SAMPLING:
+    ENABLE         : true
+    MIN_PIXELS     : 3000
+    CLASS_TEMP     : 0.01
+    MIN_CROP_RATIO : 0.5
+
+
+TRAIN:
+  IMAGE_SIZE    : [1024, 1024]    
+  BATCH_SIZE    : 2               
+  EPOCHS        : 200             
+  EVAL_START    : 100             
+  EVAL_INTERVAL : 1           
+  AMP           : false          
+  DDP           : true           
+
+LOSS:
+  NAME          : OhemCrossEntropy         
+  CLS_WEIGHTS   : false           
+
+OPTIMIZER:
+  NAME          : adamw          
+  LR            : 0.00006         
+  WEIGHT_DECAY  : 0.01            
+
+SCHEDULER:
+  NAME          : warmuppolylr    
+  POWER         : 0.9            
+  WARMUP        : 10             
+  WARMUP_RATIO  : 0.1            
+  
+
+EVAL:
+  MODEL_PATH    : 'output/DELIVER/crossweaver_deliver.pth'
+  IMAGE_SIZE    : [1024, 1024]                               
+  BATCH_SIZE    : 4                                                   
+  MSF: 
+    ENABLE      : false                                 
+    FLIP        : true                                     
+    SCALES      : [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]                  
+
+
+TEST:
+  MODEL_PATH    : 'output/DELIVER/crossweaver_deliver.pth'   
+  FILE          : 'data/DELIVER'                          
+  IMAGE_SIZE    : [1024, 1024]                         
+  OVERLAY       : false                                   

@@ -1,0 +1,52 @@
+DEVICE          : cuda              
+SAVE_DIR        : 'output'          
+
+MODEL:
+  NAME          : CrossWeaver                                           
+  BACKBONE      : CrossWeaver-B0                                        
+  PRETRAINED    : 'checkpoints/pretrained/segformer/mit_b0.pth'     
+  RESUME        : ''                                              
+
+DATASET:
+  NAME          : MCubeS                                         
+  ROOT          : '.../data/Mcubes/multimodal_dataset'               
+  IGNORE_LABEL  : 255
+  MODALS        : ['image', 'aolp', 'dolp', 'nir']
+  RARE_CLASS_SAMPLING:
+    ENABLE         : true
+    MIN_PIXELS     : 0.0
+    CLASS_TEMP     : 0.01
+    MIN_CROP_RATIO : 0.5
+
+TRAIN:
+  IMAGE_SIZE    : [512, 512]     
+  BATCH_SIZE    : 2              
+  EPOCHS        : 500          
+  EVAL_START    : 250            
+  EVAL_INTERVAL : 1              
+  AMP           : false           
+  DDP           : true           
+
+LOSS:
+  NAME          : OhemCrossEntropy     
+  CLS_WEIGHTS   : false           
+OPTIMIZER:
+  NAME          : adamw           
+  LR            : 0.00006         
+  WEIGHT_DECAY  : 0.01            
+
+SCHEDULER:
+  NAME          : warmuppolylr    
+  POWER         : 0.9             
+  WARMUP        : 10              
+  WARMUP_RATIO  : 0.1             
+  
+
+EVAL:
+  MODEL_PATH    : 'output/DELIVER/crossweaver_mcubes.pth'
+  IMAGE_SIZE    : [1024, 1024]                         
+  BATCH_SIZE    : 2               
+  MSF: 
+    ENABLE      : false                                    
+    FLIP        : true                                     
+    SCALES      : [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]                

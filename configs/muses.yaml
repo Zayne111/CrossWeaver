@@ -1,0 +1,55 @@
+DEVICE          : cuda
+SAVE_DIR        : 'output'
+
+MODEL:
+  NAME          : CrossWeaver
+  BACKBONE      : CrossWeaver-B0
+  PRETRAINED    : 'checkpoints/pretrained/segformer/mit_b0.pth'
+  RESUME        : ''
+
+DATASET:
+  NAME          : MUSES
+  ROOT          : 'data/MUSES'
+  IGNORE_LABEL  : 255
+  # REL uses three observed modalities, but keeps four checkpoint-compatible slots.
+  # RADAR is physical zero BEFORE modality-specific normalization.
+  MODALS        : ['CAMERA', 'EVENT_CAMERA', 'LIDAR', 'RADAR']
+  INPUT_MODE    : REL
+  # If the four known LiDAR files need repair, set the verified overlay manifest.
+  # For a dataset whose projected LiDAR files are already correct, keep null.
+  OVERLAY_MANIFEST : null
+
+TRAIN:
+  IMAGE_SIZE    : [1024, 1820]
+  BATCH_SIZE    : 4
+  EPOCHS        : 200
+  EVAL_START    : 100
+  EVAL_INTERVAL : 1
+  AMP           : false
+  DDP           : true
+
+LOSS:
+  NAME          : OhemCrossEntropy
+  CLS_WEIGHTS   : false
+
+OPTIMIZER:
+  NAME          : adamw
+  LR            : 0.00006
+  WEIGHT_DECAY  : 0.01
+
+SCHEDULER:
+  NAME          : warmuppolylr
+  POWER         : 0.9
+  WARMUP        : 10
+  WARMUP_RATIO  : 0.1
+
+EVAL:
+  MODEL_PATH    : 'checkpoints/MUSES_53.19.pth'
+  IMAGE_SIZE    : [1024, 1820]
+  BATCH_SIZE    : 1
+  # MUSES owns geometry and native-GT evaluation: resize logits BEFORE argmax.
+  # GT remains 1080x1920; do not use the generic RGB normalization or MSF path.
+  MSF:
+    ENABLE      : false
+    FLIP        : false
+    SCALES      : [1.0]
